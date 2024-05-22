@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqlite_database_crud/models/task.dart';
 
 class DatabaseService {
   static Database? _db;
@@ -40,5 +41,36 @@ class DatabaseService {
     final db = await database;
     db.insert(_tableName,
         {_taskContentColumnName: content, _taskStatusColumnName: 0});
+  }
+
+  Future<List<Task>> getTaskList() async {
+    final db = await database;
+    final tasks = await db.query(_tableName);
+    final taskList = tasks
+        .map((e) => Task(
+            id: e['id'] as int,
+            content: e['content'] as String,
+            status: e['status'] as int))
+        .toList();
+    return taskList;
+  }
+
+  void updateTask(int id, int status) async {
+    final db = await database;
+    db.update(
+      _tableName,
+      {_taskStatusColumnName: status},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  void deleteTask(int id) async {
+    final db = await database;
+    db.delete(
+      _tableName,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

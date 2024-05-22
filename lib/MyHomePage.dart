@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sqlite_database_crud/models/task.dart';
 import 'package:sqlite_database_crud/service/database_service.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -23,7 +24,37 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.blue,
       ),
       floatingActionButton: _addTaskButton(),
+      body: _taskList(),
     );
+  }
+
+  Widget _taskList() {
+    return FutureBuilder(
+        future: _databaseService.getTaskList(),
+        builder: (context, snapshot) {
+          return ListView.builder(
+              itemCount: snapshot.data?.length ?? 0,
+              itemBuilder: (context, index) {
+                Task _task = snapshot.data![index];
+                return InkWell(
+                  onLongPress: () {
+                    _databaseService.deleteTask(_task.id);
+                    setState(() {});
+                  },
+                  child: ListTile(
+                    title: Text(_task.content),
+                    trailing: Checkbox(
+                      value: _task.status == 1,
+                      onChanged: (value) {
+                        _databaseService.updateTask(
+                            _task.id, value == true ? 1 : 0);
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                );
+              });
+        });
   }
 
   Widget _addTaskButton() {
@@ -71,6 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       if (_editingController.text.toString() == '') return;
                       _databaseService.insertTask(_editingController.text);
                       _editingController.text = '';
+                      setState(() {});
                       Navigator.pop(context);
                     },
                     child: Text(

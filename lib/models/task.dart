@@ -1,7 +1,7 @@
 class Task {
-  late final int id;
-  late final String content;
-  late final int status;
+  final int id;
+  final String content;
+  final int status;
 
-  Task({required id, required content, required status});
+  Task({required this.id, required this.content, required this.status});
 }
